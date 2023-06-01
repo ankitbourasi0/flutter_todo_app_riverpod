@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_state_management/HomePage.dart';
+import 'package:todo_state_management/home_page.dart';
 
 void main() {
   runApp(ProviderScope(child: const Main()));
@@ -13,9 +13,9 @@ class Main extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-debugShowCheckedModeBanner: false,
-home: HomePage(),
-theme: ThemeData(primarySwatch: Colors.primaries[3]),
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
+      theme: ThemeData(primarySwatch: Colors.primaries[3]),
     );
   }
 }

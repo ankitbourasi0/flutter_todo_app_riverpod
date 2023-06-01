@@ -1,20 +1,20 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:todo_state_management/model/todo.dart';
-import 'package:todo_state_management/widgets/Todo_tile.dart';
+import 'package:todo_state_management/provider/todo_provider.dart';
+import 'package:todo_state_management/widgets/todo_tile.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomePage extends ConsumerWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todoList = ref.watch(todoListProvider);
 
-class _HomePageState extends State<HomePage> {
-  final todosList = ToDo.todoList();
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: AddButton(context),
+        floatingActionButton: addButton(context, ref),
         backgroundColor: Colors.black,
         appBar: AppBar(
           title: Text("Todo App with Riverpod"),
@@ -24,22 +24,24 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.all(25),
           child: Column(children: [
             searchBox(),
-            Expanded(
-                child: ListView(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 50, bottom: 30),
-                  child: Text(
-                    'All Todos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+            Container(
+              margin: EdgeInsets.only(top: 50, bottom: 30),
+              child: Text(
+                'All Todos',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w500,
                 ),
-                for (var todo in todosList) TodoTile(todo: todo),
-              ],
+              ),
+            ),
+            Expanded(
+                child: ListView.builder(
+              itemCount: todoList.length,
+              itemBuilder: (context, index) {
+                final todo = todoList[index];
+                return TodoTile(todo: todo);
+              },
             ))
           ]),
         ));
@@ -73,7 +75,8 @@ Widget searchBox() {
   );
 }
 
-Widget AddButton(context) {
+Widget addButton(context, WidgetRef ref) {
+  final textController = TextEditingController();
   return FloatingActionButton(
       child: Icon(Icons.add),
       onPressed: () {
@@ -94,6 +97,7 @@ Widget AddButton(context) {
               child: Container(
                 decoration: BoxDecoration(color: Colors.amber),
                 child: TextField(
+                  controller: textController,
                   decoration: InputDecoration(
                       contentPadding: EdgeInsets.all(20),
                       prefixIcon: Icon(
@@ -104,7 +108,7 @@ Widget AddButton(context) {
                       prefixIconConstraints:
                           BoxConstraints(minHeight: 20, minWidth: 15),
                       border: InputBorder.none,
-                      hintText: 'Search',
+                      hintText: 'Enter todo',
                       hintStyle: TextStyle(
                         color: Colors.white,
                       )),
@@ -114,7 +118,19 @@ Widget AddButton(context) {
             actions: <Widget>[
               //Add button
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  ref.read(todoListProvider.notifier).update((state) {
+                    // state.add(ToDo(todoText: textController.text));
+                    state = [
+                      ...state,
+                      ToDo(
+                          id: Random().nextInt(100),
+                          todoText: textController.text)
+                    ];
+                    return state;
+                  });
+                  Navigator.pop(context);
+                },
                 child: Container(
                   decoration: BoxDecoration(
                       color: Colors.primaries[3],
